@@ -338,7 +338,7 @@ erDiagram
     }
     MATCH_STATISTICS {
         int id PK
-        int match_id FK_UK
+        int match_id FK, UK
         decimal home_possession
         decimal away_possession
         int home_shots
@@ -376,7 +376,7 @@ erDiagram
     }
     TRADING_RISK_ALERTS {
         int id PK
-        int odds_history_id FK_UK
+        int odds_history_id FK, UK
         string severity
         datetime acknowledged_at
         string acknowledgement_note
@@ -421,8 +421,8 @@ erDiagram
         string suspension_kind
     }
     SIMULATION_SELECTION_QUOTES {
-        string run_id PK_FK
-        int selection_id PK_FK
+        string run_id PK, FK
+        int selection_id PK, FK
         decimal decimal_odds
         decimal fair_probability
         string reason
@@ -732,7 +732,7 @@ Manchester City FC | Played 38 | Points 89 | Goals 94-33 | Avg GF 2.47
 - [`sportsops/database/validation.py`](./sportsops/database/validation.py):
   input/database checks and alert persistence.
 - [`sportsops/services/simulation.py`](./sportsops/services/simulation.py):
-  legacy simulated-match helper retained for existing Phase 1–3 callers.
+  legacy simulated-match helper retained for existing Phase 1â€“3 callers.
 - [`sportsops/services/football_simulation.py`](./sportsops/services/football_simulation.py):
   reproducible event schedules and the Poisson-based probability/odds model.
 - [`sportsops/database/simulation_repository.py`](./sportsops/database/simulation_repository.py):
@@ -761,7 +761,7 @@ The PostgreSQL 18 Windows service is installed and running locally on port
 5432. Live integration was not completed in this verification: local
 connections require SCRAM password authentication, but no password or
 connection URL was configured in this session. A noninteractive connection
-was refused with “no password supplied”; no database or schema was created,
+was refused with â€œno password suppliedâ€; no database or schema was created,
 and PostgreSQL integration results are **not claimed as verified**. Follow
 the Windows reproduction steps above after configuring the dedicated test
 role and database locally.
