@@ -7,6 +7,25 @@ PySide6, SQLAlchemy, and SQLite by default; PostgreSQL is supported as an
 optional technical database. There are no live sports feeds, bookmaker
 connections, or betting transactions.
 
+## Download SportsOps for Windows
+
+**Latest release: [SportsOps v1.0.1](https://github.com/gh-395/SportsOps/releases/tag/v1.0.1)**
+
+To run SportsOps without installing Python:
+
+1. Download `SportsOps-v1.0.1-Windows.zip` from the release page.
+2. Extract the ZIP archive.
+3. Open `SportsOps.exe` inside the extracted `SportsOps` folder.
+
+The Windows executable has been tested successfully on two separate computers.
+
+### What's New in v1.0.1
+
+- Added **Simulate Risk Event**, allowing users to generate unexpected odds movements and test risk detection.
+- Integrated simulated risk events with Trading Risk monitoring and Odds History.
+- Improved dark theme consistency across Windows Light and Dark modes.
+- Fixed database lookup errors affecting risk event simulation.
+
 ## Application Screenshots
 
 ### Markets Workspace
@@ -111,6 +130,8 @@ and sort by table headings.
   invalid model prices or probabilities stop the reprice with an explicit
   error. These are local simulated quotes, not external feeds, so an external
   feed-staleness alert is not applicable.
+- **Simulate Risk Event** allows operators to deliberately generate an unexpected odds movement for a selected market outcome during an active simulation run. The application records the new quote in Odds History, evaluates the movement against the configured risk thresholds, and creates a corresponding Trading Risk occurrence. This provides a reproducible way to demonstrate risk detection without relying on external odds feeds or waiting for a naturally occurring anomaly.
+- Normal simulation events, including goals, red cards, and scheduled clock updates, are treated as expected repricing activity rather than automatically classified as risk incidents. This distinction helps separate legitimate market movements from deliberately injected anomalies.
 - Risk incidents are scoped to a simulation run. The default risk view shows
   the current or most recent run; **All runs** and **Historical only** expose
   earlier incidents. Resetting or starting another run never deletes an
