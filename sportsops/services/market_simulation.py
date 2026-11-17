@@ -71,6 +71,11 @@ class MarketSimulationController:
             self._running = False
         return changes
 
+    def simulate_risk_event(self, selection_id: int) -> str:
+        if self._run is None or not self._running:
+            raise ValueError("Start or resume a simulation first.")
+        return self.database.simulate_risk_event(self._run.run_id, selection_id)
+
     def halt_after_error(self) -> None:
         self._running = False
 

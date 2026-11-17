@@ -241,6 +241,77 @@ def start_event_simulation(
     return run
 
 
+def simulate_risk_event(session: Session, run_id: str, selection_id: int) -> str:
+    """Inject one explicitly labeled demo odds anomaly into an active simulation."""
+    run = _get_run(session, run_id)
+    if run.status != "RUNNING":
+        raise ValueError("Start or resume a simulation before testing Trading Risk.")
+    selection = session.get(MarketSelection, selection_id)
+    if selection is None:
+        raise ValueError("The selected market selection no longer exists.")
+    market = session.get(Market, selection.market_id)
+    if market is None or not market.is_simulated:
+        raise ValueError("Risk tests are only supported for simulated markets.")
+    state = session.scalar(
+        select(SimulationMarketState).where(
+            SimulationMarketState.run_id == run_id,
+            SimulationMarketState.market_id == market.id,
+        )
+    )
+    if state is None or state.status != "OPEN":
+        raise ValueError("Select an open market in the active simulation.")
+    quote = session.scalar(
+        select(SimulationSelectionQuote).where(
+            SimulationSelectionQuote.run_id == run_id,
+            SimulationSelectionQuote.selection_id == selection_id,
+        )
+    )
+    if quote is None:
+        raise ValueError("No simulated quote exists for the selected market.")
+
+    previous = quote.decimal_odds
+    # Choose a movement above the critical threshold, within configured odds limits.
+    magnitude = max(run.critical_percent + Decimal("5"), Decimal("20"))
+    multiplier = Decimal("1") + magnitude / Decimal("100")
+    upwards = (previous * multiplier).quantize(_ODDS_QUANTUM, rounding=ROUND_HALF_UP)
+    downwards = (previous / multiplier).quantize(_ODDS_QUANTUM, rounding=ROUND_HALF_UP)
+    candidates = [value for value in (upwards, downwards)
+                  if MINIMUM_ODDS <= value <= MAXIMUM_ODDS and value != previous]
+    if not candidates:
+        raise ValueError("No valid demo movement is possible for this quote.")
+    new_odds = max(candidates, key=lambda value: abs((value - previous) / previous))
+    movement = (new_odds - previous) / previous * Decimal("100")
+    severity = _risk_severity(movement, run.warning_percent,
+                              run.critical_percent, "RISK_TEST")
+    if severity is None:
+        raise ValueError("Risk thresholds are too high for a valid demo movement.")
+    _validate_simulation_quote(new_odds, quote.fair_probability, selection_id)
+    reason = "DEMO RISK TEST: operator-injected unexpected odds movement."
+    history = SimulationOddsHistory(
+        run_id=run_id, market_id=market.id, selection_id=selection_id,
+        event_id=None, previous_odds=previous, current_odds=new_odds,
+        fair_probability=quote.fair_probability,
+        percentage_change=movement.quantize(_PERCENT_QUANTUM, rounding=ROUND_HALF_UP),
+        cause_type="RISK_TEST", reason=reason, changed_at=_utc_now(),
+        idempotency_key=f"{run_id}:RISK_TEST:{uuid4().hex}:{selection_id}",
+    )
+    session.add(history)
+    session.flush()
+    quote.decimal_odds = new_odds
+    quote.reason = reason
+    quote.event_id = None
+    quote.updated_at = history.changed_at
+    _record_audit(
+        session, "DEMO_RISK_TEST", reason, run_id=run_id,
+        match_id=market.match_id, market_id=market.id, selection_id=selection_id,
+        old_value=f"{previous:.3f}", new_value=f"{new_odds:.3f}",
+    )
+    _record_risk_occurrence(session, run, market.match_id, market,
+                            selection, history, severity, movement)
+    session.flush()
+    return severity
+
+
 def pause_event_simulation(session: Session, run_id: str) -> bool:
     run = _get_run(session, run_id)
     if run.status != "RUNNING":

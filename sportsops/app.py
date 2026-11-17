@@ -2,6 +2,7 @@ import os
 import sys
 from pathlib import Path
 
+from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication
 from PySide6.QtWidgets import QMessageBox
 from sqlalchemy.exc import SQLAlchemyError
@@ -28,6 +29,43 @@ def main() -> int:
     app.setApplicationName("SportsOps")
     app.setOrganizationName("SportsOps")
     app.setStyle("Fusion")
+
+
+
+
+    palette = QPalette()
+    palette.setColor(QPalette.ColorRole.Window, QColor("#1b1f24"))
+    palette.setColor(QPalette.ColorRole.WindowText, QColor("#e6e9ed"))
+    palette.setColor(QPalette.ColorRole.Base, QColor("#22272e"))
+    palette.setColor(QPalette.ColorRole.AlternateBase, QColor("#292f37"))
+    palette.setColor(QPalette.ColorRole.Text, QColor("#e6e9ed"))
+    palette.setColor(QPalette.ColorRole.Button, QColor("#303942"))
+    palette.setColor(QPalette.ColorRole.ButtonText, QColor("#e6e9ed"))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor("#275b7a"))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor("#ffffff"))
+    palette.setColor(QPalette.ColorRole.ToolTipBase, QColor("#303942"))
+    palette.setColor(QPalette.ColorRole.ToolTipText, QColor("#f0f2f4"))
+    palette.setColor(QPalette.ColorRole.PlaceholderText, QColor("#929da8"))
+    palette.setColor(QPalette.ColorRole.Light, QColor("#46515d"))
+    palette.setColor(QPalette.ColorRole.Mid, QColor("#363e47"))
+    palette.setColor(QPalette.ColorRole.Dark, QColor("#171a1e"))
+
+    palette.setColor(
+        QPalette.ColorGroup.Disabled,
+        QPalette.ColorRole.Text,
+        QColor("#78838e"),
+    )
+    palette.setColor(
+        QPalette.ColorGroup.Disabled,
+        QPalette.ColorRole.ButtonText,
+        QColor("#78838e"),
+    )
+
+    app.setPalette(palette)
+
+
+
+
     app.setStyleSheet(
         """
         QWidget {

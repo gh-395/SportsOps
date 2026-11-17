@@ -148,6 +148,9 @@ class MarketWorkspace(QWidget):
         self.pause_button.clicked.connect(self.pause_simulation)
         self.reset_button = QPushButton("Reset Run")
         self.reset_button.clicked.connect(self.reset_simulation)
+        self.risk_test_button = QPushButton("Simulate Risk Event")
+        self.risk_test_button.setToolTip("Inject a labeled demo anomaly into the selected simulated quote")
+        self.risk_test_button.clicked.connect(self.simulate_risk_event)
         self.simulation_status = QLabel("OFF")
         self.simulation_status.setStyleSheet("color: #aab3bc; font-weight: bold;")
         self.suspend_button = QPushButton("Suspend Selected")
@@ -164,6 +167,7 @@ class MarketWorkspace(QWidget):
             self.start_button,
             self.pause_button,
             self.reset_button,
+            self.risk_test_button,
             self.simulation_status,
             self.suspend_button,
             self.reopen_button,
@@ -431,6 +435,7 @@ class MarketWorkspace(QWidget):
         self.pause_button.setEnabled(self.simulation.running)
         self.start_button.setEnabled(not self.simulation.running)
         self.reset_button.setEnabled(run is not None)
+        self.risk_test_button.setEnabled(self.simulation.running)
         self.speed_filter.setEnabled(
             run is None or run.status in ("RUNNING", "PAUSED")
         )
@@ -602,6 +607,28 @@ class MarketWorkspace(QWidget):
             "INFO",
             "Event-driven football simulation started or resumed "
             f"(seed {self.simulation.run.seed}, {self.simulation.run.speed}x).",
+        )
+
+    def simulate_risk_event(self) -> None:
+        row = self._selected_market_row
+        if row is None:
+            self._show_status("Select a simulated market selection first.")
+            return
+        try:
+            severity = self.simulation.simulate_risk_event(row.selection_id)
+            self.refresh()
+            self.risk_run_filter.setCurrentIndex(0)
+            self.risk_severity_filter.setCurrentIndex(0)
+            self.risk_status_filter.setCurrentIndex(0)
+            self.bottom_tabs.setCurrentIndex(0)
+        except (SQLAlchemyError, ValueError, LookupError) as error:
+            if isinstance(error, SQLAlchemyError):
+                self._show_database_error("simulate demo risk event", error)
+            else:
+                self._show_status(str(error))
+            return
+        self.activityLogged.emit(
+            "WARNING", f"DEMO RISK TEST: {severity} incident recorded for selection {row.selection_id}."
         )
 
     def pause_simulation(self) -> None:

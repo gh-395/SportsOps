@@ -37,6 +37,7 @@ from sportsops.database.simulation_repository import (
     load_trading_risk_incidents,
     pause_event_simulation,
     reset_event_simulation,
+    simulate_risk_event,
     set_event_simulation_speed,
     set_event_simulation_thresholds,
     start_event_simulation,
@@ -300,6 +301,10 @@ class DatabaseService:
     def advance_event_simulation(self, run_id: str) -> int:
         with Session(self._engine) as session, session.begin():
             return advance_event_simulation(session, run_id)
+
+    def simulate_risk_event(self, run_id: str, selection_id: int) -> str:
+        with Session(self._engine) as session, session.begin():
+            return simulate_risk_event(session, run_id, selection_id)
 
     def reset_event_simulation(self, run_id: str) -> bool:
         with Session(self._engine) as session, session.begin():
