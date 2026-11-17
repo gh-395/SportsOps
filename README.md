@@ -7,6 +7,23 @@ PySide6, SQLAlchemy, and SQLite by default; PostgreSQL is supported as an
 optional technical database. There are no live sports feeds, bookmaker
 connections, or betting transactions.
 
+## Application Screenshots
+
+### Markets Workspace
+Live-style football market simulation with event-driven odds updates, match scores, and market controls.
+
+![SportsOps Markets Workspace](screenshots/markets-workspace.png)
+
+### Trading Risk
+Run-scoped risk incident monitoring with severity filters, acknowledgement tracking, and audit history.
+
+![SportsOps Trading Risk](screenshots/trading-risk.png)
+
+### Historical Data
+SQL-powered exploration of 8,676 historical football results across four European leagues.
+
+![SportsOps Historical Data](screenshots/historical-data.png)
+
 ## Requirements
 
 - Windows 10 or later
